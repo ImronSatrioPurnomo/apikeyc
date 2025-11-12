@@ -52,5 +52,34 @@ app.get("/", (req, res) => {
   res.sendFile(path.resolve(__dirname, "public", "index.html"));
 });
 
+// === Validate API key ===
+app.post("/api/validate", (req, res) => {
+  const { apiKey } = req.body;
+
+  if (!apiKey) {
+    return res.status(400).json({ valid: false, error: "API key is required" });
+  }
+
+  const sql = "SELECT * FROM api_keys WHERE api_key = ?";
+  db.query(sql, [apiKey], (err, results) => {
+    if (err) {
+      console.error("❌ Database error:", err);
+      return res.status(500).json({ valid: false, message: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ valid: false, message: "❌ Invalid API Key" });
+    }
+
+    const row = results[0];
+    res.json({
+      valid: true,
+      message: `✅ Valid API key for ${row.name}`,
+      issuedAt: row.created_at,
+    });
+  });
+});
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
