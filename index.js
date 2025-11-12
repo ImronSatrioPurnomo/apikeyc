@@ -80,6 +80,16 @@ app.post("/api/validate", (req, res) => {
   });
 });
 
+// === Get all keys (debugging / Postman) ===
+app.get("/api/keys", (req, res) => {
+  db.query("SELECT * FROM api_keys ORDER BY id DESC", (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to fetch keys" });
+    }
+    res.json(results);
+  });
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
